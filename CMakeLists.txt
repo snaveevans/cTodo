@@ -4,4 +4,6 @@ project(cfun)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-add_executable(cfun main.c)
+file(GLOB SOURCES "src/*.c")
+
+add_executable(cfun ${SOURCES})
