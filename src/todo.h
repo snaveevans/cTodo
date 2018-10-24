@@ -2,9 +2,10 @@
 #define TODO_H_ 
 
 struct Todo {
-	char * name;
+	char *id;
+	char *name;
 };
 
-int foo(int x);
+int createTodo(struct Todo *todo, char *name);
 
 #endif

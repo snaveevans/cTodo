@@ -1,5 +1,9 @@
+#include <stdlib.h>
+#include "guid/guid.h"
 #include "todo.h"
 
-int foo(int x) {
-	return x + 5;
+int createTodo(struct Todo *todo, char *name) {
+	struct Todo temp = { newGuid(), name };
+	*todo = temp;
+	return 0;
 }
