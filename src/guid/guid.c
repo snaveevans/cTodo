@@ -1,9 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "random.h"
+#include "guid.h"
 
-char convertToHex(int value) {
-	if (value > 15) {
+char convertToHex(int value)
+{
+	if (value > 15)
+	{
 		// error out
 	}
 	char hex [4];
@@ -11,26 +15,36 @@ char convertToHex(int value) {
 	return hex[0];
 }
 
-char * newGuid() {
+int newGuid(struct Guid *guid)
+{
 	int size = 36;
-	char *guid;
-	guid = (char *)malloc(sizeof(char)*size);
+	char *value;
+	value = (char *)malloc(sizeof(char) * size + 1);
 	int pos, randomNumber;
 	char hex;
-	for (pos = 0; pos < size; pos++) {
+	for (pos = 0; pos < size; pos++)
+	{
 		randomNumber = getRandomBetween(0, 15);
-		if (pos == 8 || pos == 13 || pos == 18 || pos == 23) {
+		if (pos == 8 || pos == 13 || pos == 18 || pos == 23)
+		{
 			hex = '-';
-		} else if (pos == 14) {
+		} 
+		else if (pos == 14) 
+		{
 			hex = '4';
-		} else if (pos == 19) {
+		}
+		else if (pos == 19)
+		{
 			randomNumber = randomNumber & (0x3 | 0x8);
 			hex = convertToHex(randomNumber);
-		} else {
+		}
+		else
+		{
 			hex = convertToHex(randomNumber);
 		}
-		guid[pos] = hex;
+		value[pos] = hex;
 	}
-	guid[size] = 0;
-	return guid;
+	value[size] = 0;
+	guid->value = value;
+	return 0;
 }

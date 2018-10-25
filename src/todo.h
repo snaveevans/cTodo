@@ -1,8 +1,9 @@
 #ifndef TODO_H_ 
 #define TODO_H_ 
 
-struct Todo {
-	char *id;
+struct Todo
+{
+	struct Guid *id;
 	char *name;
 };
 
