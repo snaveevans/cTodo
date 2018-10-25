@@ -7,16 +7,18 @@
 
 int main(int argc, char **argv)
 {
+	char *name;
 	char command;
 	const struct option longOptions[] = 
 	{
+		{"new", required_argument, 0, 'n'},
 		{"help", no_argument, 0, 'h'},
 		{"version", no_argument, 0, 'v'}
 	};
 
 	while (1) {
 		int optionIndex = -1;
-		int c= getopt_long(argc, argv, "hv", longOptions, &optionIndex);
+		int c= getopt_long(argc, argv, "n:hv", longOptions, &optionIndex);
 
 		if (c== -1)
 		{
@@ -29,11 +31,15 @@ int main(int argc, char **argv)
 				// long option hit
 				command = longOptions[optionIndex].val;
 				break;
+			case 'n':
+				command = c;
+				name = optarg;
+				break;
 			case 'h':
-				command = 'h';
+				command = c;
 				break;
 			case 'v':
-				command = 'v';
+				command = c;
 				break;
 		}
 
@@ -45,6 +51,13 @@ int main(int argc, char **argv)
 
 	switch (command)
 	{
+		case 'n':
+			{
+				struct Todo *todo = calloc(1, sizeof(struct Todo));
+				createTodo(todo, name);
+				printf("Todo created id: %s name: %s \n", todo->id->value, name);
+				break;
+			}
 		case 'h':
 			printf("help text \n");
 			break;
