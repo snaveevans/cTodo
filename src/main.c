@@ -8,7 +8,7 @@
 int main(int argc, char **argv)
 {
 	char *name;
-	char command;
+	char command = 0;
 	const struct option longOptions[] = 
 	{
 		{"new", required_argument, 0, 'n'},
@@ -43,7 +43,7 @@ int main(int argc, char **argv)
 				break;
 		}
 
-		if (command)
+		if (command != 0)
 		{
 			break;
 		}
@@ -56,6 +56,10 @@ int main(int argc, char **argv)
 				struct Todo *todo = calloc(1, sizeof(struct Todo));
 				createTodo(todo, name);
 				printf("Todo created id: %s name: %s \n", todo->id->value, name);
+				free(todo->id->value);
+				free(todo->id);
+				// no need to free name, it belongs to the thread's stack
+				free(todo);
 				break;
 			}
 		case 'h':
