@@ -1,24 +1,29 @@
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/types.h>
-#include <unistd.h>
 #include <string.h>
 #include "todo.h"
-#include "guid/random.h"
 #include "guid/guid.h"
 
-int testGlobal;
+int main(int argc, char **argv)
+{
 
-int main(int argc, char *argv[]) {
-	int processId = getpid();
-	printf("Process Id: %d \n\n", processId);
+	struct Guid *guid = (struct Guid *)calloc(1, sizeof(struct Guid));
+	newGuid(guid);
+	printf("guid: %s \n", guid->value);
+	free(guid->value);
+	free(guid);
 
+	char *test = calloc(12, sizeof(char));
+	strcpy(test, "Hello World");
 	struct Todo *todo = calloc(1, sizeof(struct Todo));;
-	createTodo(todo, "hello world");
+	createTodo(todo, test);
 
-	printf("id: %s name: %s \n", todo->id, todo->name);
+	printf("id: %s name: %s \n", todo->id->value, todo->name);
 
-	static int foo = 1000;
+	free(todo->id->value);
+	free(todo->id);
+	free(todo->name);
 	free(todo);
 
 	return 0;
