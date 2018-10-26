@@ -3,13 +3,28 @@
 #include "guid/guid.h"
 #include "todo.h"
 
-int createTodo(struct Todo *todo, char *name)
+struct Todo *create_todo(char *name)
 {
-	struct Guid *guid = (struct Guid *)calloc(1, sizeof(struct Guid));
+	struct Todo *todo = calloc(1, sizeof(struct Todo));
+	if (todo == NULL)
+	{
+		return NULL;
+	}
 
-	newGuid(guid);
+	struct Guid *guid = new_guid();
+	if (guid == NULL)
+	{
+		return NULL;
+	}
+
 	todo->id = guid;
 	todo->name = name;
+	return todo;
 	
+	return 0;
+}
+
+int get_todos(struct Todo **todos)
+{
 	return 0;
 }

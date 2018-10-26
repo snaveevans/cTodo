@@ -6,7 +6,6 @@ struct Guid
 	char *value;
 };
 
-int newGuid(struct Guid *guid);
-char convertToHex(int value);
+struct Guid *new_guid();
 
 #endif

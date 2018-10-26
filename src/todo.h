@@ -7,6 +7,6 @@ struct Todo
 	char *name;
 };
 
-int createTodo(struct Todo *todo, char *name);
+struct Todo *create_todo(char *name);
 
 #endif

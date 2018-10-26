@@ -2,15 +2,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
+#include <cjson/cJSON.h>
 #include "todo.h"
 #include "guid/guid.h"
 
-int createTodos(struct Todo **todos, int count)
+const char *TODO_FILE_NAME = ".todos";
+
+int _createTodos(struct Todo **todos, int count)
 {
 	char *nameTemplate = "Hello World - ";
 	for (int i = 0; i < count; i++)
 	{
-		struct Todo *todo = calloc(1, sizeof(struct Todo));
 		char *name = calloc(strlen(nameTemplate) + 2, sizeof(char));
 		char *temp = calloc(2, sizeof(char));;
 
@@ -18,7 +21,7 @@ int createTodos(struct Todo **todos, int count)
 		sprintf(temp, "%d", i);
 		strcat(name, temp);
 
-		createTodo(todo, name);
+		struct Todo *todo = create_todo(name);
 		todos[i] = todo;
 
 		free(temp);
@@ -78,8 +81,11 @@ int main(int argc, char **argv)
 	{
 		case 'n':
 			{
-				struct Todo *todo = calloc(1, sizeof(struct Todo));
-				createTodo(todo, name);
+				struct Todo *todo = create_todo(name);
+				if (todo == NULL)
+				{
+					return 1;
+				}
 				printf("Todo created id: %s name: %s \n", todo->id->value, todo->name);
 				free(todo->id->value);
 				free(todo->id);
@@ -92,9 +98,32 @@ int main(int argc, char **argv)
 			break;
 		case 'l':
 			{
+				/*char *homeDirectory= getenv("HOME");*/
+				/*char *todoFile = calloc(strlen(homeDirectory) + strlen(TODO_FILE_NAME) + 2, sizeof(char));*/
+				/*strcpy(todoFile, homeDirectory);*/
+				/*strcat(todoFile, "/");*/
+				/*strcat(todoFile, TODO_FILE_NAME);*/
+				/*puts(todoFile);*/
+				/*free(homeDirectory);*/
+
+				/*FILE *file = NULL;*/
+				/*int hasAccess = access(todoFile, R_OK|W_OK);*/
+				/*file = fopen(todoFile, "a+");*/
+				/*if (file != NULL)*/
+				/*{*/
+					/*if (hasAccess == 0)*/
+					/*{*/
+						/*// file already exists read in existing data*/
+					/*}*/
+
+					/*// initalize*/
+					/*fclose(file);*/
+				/*}*/
+
+				/*free(todoFile);*/
 				int size = 5;
 				struct Todo **todos = (struct Todo **)calloc(size, sizeof(struct Todo));
-				createTodos(todos, size);
+				_createTodos(todos, size);
 				for (int pos = 0; pos < size; pos++)
 				{
 					printf("Todo id: %s name: %s \n", todos[pos]->id->value, todos[pos]->name);

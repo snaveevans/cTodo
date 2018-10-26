@@ -4,7 +4,7 @@
 #include "random.h"
 #include "guid.h"
 
-char convertToHex(int value)
+char _convert_to_hex(int value)
 {
 	if (value > 15)
 	{
@@ -15,11 +15,15 @@ char convertToHex(int value)
 	return hex[0];
 }
 
-int newGuid(struct Guid *guid)
+struct Guid *new_guid()
 {
 	int size = 36;
-	char *value;
-	value = (char *)malloc(sizeof(char) * size + 1);
+	struct Guid *guid = (struct Guid *)calloc(1, sizeof(struct Guid));
+	char *value = (char *)malloc(sizeof(char) * size + 1);
+	if (guid == NULL || value == NULL)
+	{
+		return NULL;
+	}
 	int pos, randomNumber;
 	char hex;
 	for (pos = 0; pos < size; pos++)
@@ -36,15 +40,15 @@ int newGuid(struct Guid *guid)
 		else if (pos == 19)
 		{
 			randomNumber = randomNumber & (0x3 | 0x8);
-			hex = convertToHex(randomNumber);
+			hex = _convert_to_hex(randomNumber);
 		}
 		else
 		{
-			hex = convertToHex(randomNumber);
+			hex = _convert_to_hex(randomNumber);
 		}
 		value[pos] = hex;
 	}
 	value[size] = 0;
 	guid->value = value;
-	return 0;
+	return guid;
 }
