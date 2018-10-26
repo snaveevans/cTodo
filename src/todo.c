@@ -11,6 +11,12 @@ struct Todo *create_todo(char *name)
 		return NULL;
 	}
 
+	todo->name = calloc(strlen(name) + 1, sizeof(char));
+	if (todo->name == NULL)
+	{
+		return NULL;
+	}
+
 	struct Guid *guid = new_guid();
 	if (guid == NULL)
 	{
@@ -18,13 +24,24 @@ struct Todo *create_todo(char *name)
 	}
 
 	todo->id = guid;
-	todo->name = name;
+	strcpy(todo->name, name);
 	return todo;
-	
+}
+
+struct Todo *get_todos()
+{
+	return NULL;
+}
+
+int write_todo(struct Todo *todo)
+{
 	return 0;
 }
 
-int get_todos(struct Todo **todos)
+void free_todo(struct Todo *todo)
 {
-	return 0;
+	free(todo->id->value);
+	free(todo->id);
+	free(todo->name);
+	free(todo);
 }

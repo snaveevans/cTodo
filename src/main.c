@@ -87,10 +87,8 @@ int main(int argc, char **argv)
 					return 1;
 				}
 				printf("Todo created id: %s name: %s \n", todo->id->value, todo->name);
-				free(todo->id->value);
-				free(todo->id);
-				// no need to free name, it belongs to the thread's stack
-				free(todo);
+				write_todo(todo);
+				free_todo(todo);
 				break;
 			}
 		case 'h':
@@ -98,41 +96,29 @@ int main(int argc, char **argv)
 			break;
 		case 'l':
 			{
-				/*char *homeDirectory= getenv("HOME");*/
-				/*char *todoFile = calloc(strlen(homeDirectory) + strlen(TODO_FILE_NAME) + 2, sizeof(char));*/
-				/*strcpy(todoFile, homeDirectory);*/
-				/*strcat(todoFile, "/");*/
-				/*strcat(todoFile, TODO_FILE_NAME);*/
-				/*puts(todoFile);*/
-				/*free(homeDirectory);*/
+				char *homeDirectory= getenv("HOME");
+				char *todoFile = calloc(strlen(homeDirectory) + strlen(TODO_FILE_NAME) + 2, sizeof(char));
+				strcpy(todoFile, homeDirectory);
+				strcat(todoFile, "/");
+				strcat(todoFile, TODO_FILE_NAME);
+				puts(todoFile);
+				free(homeDirectory);
 
-				/*FILE *file = NULL;*/
-				/*int hasAccess = access(todoFile, R_OK|W_OK);*/
-				/*file = fopen(todoFile, "a+");*/
-				/*if (file != NULL)*/
-				/*{*/
-					/*if (hasAccess == 0)*/
-					/*{*/
-						/*// file already exists read in existing data*/
-					/*}*/
-
-					/*// initalize*/
-					/*fclose(file);*/
-				/*}*/
-
-				/*free(todoFile);*/
-				int size = 5;
-				struct Todo **todos = (struct Todo **)calloc(size, sizeof(struct Todo));
-				_createTodos(todos, size);
-				for (int pos = 0; pos < size; pos++)
+				FILE *file = NULL;
+				int hasAccess = access(todoFile, R_OK|W_OK);
+				file = fopen(todoFile, "a+");
+				if (file != NULL)
 				{
-					printf("Todo id: %s name: %s \n", todos[pos]->id->value, todos[pos]->name);
-					free(todos[pos]->id->value);
-					free(todos[pos]->id);
-					free(todos[pos]->name);
-					free(todos[pos]);
+					if (hasAccess == 0)
+					{
+						// file already exists read in existing data
+					}
+
+					// initalize
+					fclose(file);
 				}
-				free(todos);
+
+				free(todoFile);
 				break;
 			}
 		case 'v':

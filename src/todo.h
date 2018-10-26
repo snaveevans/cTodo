@@ -8,5 +8,8 @@ struct Todo
 };
 
 struct Todo *create_todo(char *name);
+struct Todo *get_todos();
+int write_todo(struct Todo *todo);
+void free_todo(struct Todo *todo);
 
 #endif
