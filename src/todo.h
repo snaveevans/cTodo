@@ -1,15 +1,18 @@
 #ifndef TODO_H_ 
 #define TODO_H_ 
+#include "guid/guid.h"
 
-struct Todo
+typedef struct
 {
-	struct Guid *id;
+	Guid *id;
 	char *name;
-};
+} Todo;
 
-struct Todo *create_todo(char *name);
-struct Todo *get_todos();
-int write_todo(struct Todo *todo);
-void free_todo(struct Todo *todo);
+Todo *create_todo(char *name);
+int get_todos_length();
+int get_todos(Todo **todos, int length);
+int write_todo(Todo *todo);
+void free_todo(Todo *todo);
+void free_todos(Todo **todos, int length);
 
 #endif

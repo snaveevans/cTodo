@@ -15,10 +15,10 @@ char _convert_to_hex(int value)
 	return hex[0];
 }
 
-struct Guid *new_guid()
+Guid *new_guid()
 {
 	int size = 36;
-	struct Guid *guid = (struct Guid *)calloc(1, sizeof(struct Guid));
+	Guid *guid = (Guid *)calloc(1, sizeof(Guid));
 	char *value = (char *)malloc(sizeof(char) * size + 1);
 	if (guid == NULL || value == NULL)
 	{
@@ -50,5 +50,17 @@ struct Guid *new_guid()
 	}
 	value[size] = 0;
 	guid->value = value;
+	return guid;
+}
+
+Guid *_recreate_guid(char *id)
+{
+	Guid *guid = (Guid *)calloc(1, sizeof(Guid));
+	guid->value = calloc(strlen(id) + 1, sizeof(char));
+	if (guid->value == NULL)
+	{
+		return NULL;
+	}
+	strcpy(guid->value, id);
 	return guid;
 }

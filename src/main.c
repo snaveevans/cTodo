@@ -3,31 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <cjson/cJSON.h>
 #include "todo.h"
 #include "guid/guid.h"
-
-const char *TODO_FILE_NAME = ".todos";
-
-int _createTodos(struct Todo **todos, int count)
-{
-	char *nameTemplate = "Hello World - ";
-	for (int i = 0; i < count; i++)
-	{
-		char *name = calloc(strlen(nameTemplate) + 2, sizeof(char));
-		char *temp = calloc(2, sizeof(char));;
-
-		strcpy(name, nameTemplate);
-		sprintf(temp, "%d", i);
-		strcat(name, temp);
-
-		struct Todo *todo = create_todo(name);
-		todos[i] = todo;
-
-		free(temp);
-	}
-	return 0;
-}
 
 int main(int argc, char **argv)
 {
@@ -81,7 +58,7 @@ int main(int argc, char **argv)
 	{
 		case 'n':
 			{
-				struct Todo *todo = create_todo(name);
+				Todo *todo = create_todo(name);
 				if (todo == NULL)
 				{
 					return 1;
@@ -96,29 +73,18 @@ int main(int argc, char **argv)
 			break;
 		case 'l':
 			{
-				char *homeDirectory= getenv("HOME");
-				char *todoFile = calloc(strlen(homeDirectory) + strlen(TODO_FILE_NAME) + 2, sizeof(char));
-				strcpy(todoFile, homeDirectory);
-				strcat(todoFile, "/");
-				strcat(todoFile, TODO_FILE_NAME);
-				puts(todoFile);
-				free(homeDirectory);
-
-				FILE *file = NULL;
-				int hasAccess = access(todoFile, R_OK|W_OK);
-				file = fopen(todoFile, "a+");
-				if (file != NULL)
+				int length = get_todos_length();
+				printf("length: %d \n", length);
+				Todo **todos = malloc(length * sizeof(Todo));;
+				if(get_todos(todos, length) == 0)
 				{
-					if (hasAccess == 0)
+					for (int pos = 0; pos < length; pos++)
 					{
-						// file already exists read in existing data
+						printf("[%d] Id: %s -- Name: %s \n", pos, todos[pos]->id->value, todos[pos]->name);
 					}
-
-					// initalize
-					fclose(file);
 				}
+				free_todos(todos, length);;
 
-				free(todoFile);
 				break;
 			}
 		case 'v':

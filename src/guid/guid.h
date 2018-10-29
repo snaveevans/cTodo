@@ -1,11 +1,12 @@
 #ifndef GUID_H_ 
 #define GUID_H_ 
 
-struct Guid
+typedef struct
 {
 	char *value;
-};
+} Guid;
 
-struct Guid *new_guid();
+Guid *new_guid();
+Guid *_recreate_guid(char *id);
 
 #endif
