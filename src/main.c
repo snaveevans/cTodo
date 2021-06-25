@@ -67,13 +67,10 @@ int main(int argc, char **argv) {
     break;
   }
   case 'l': {
-    int length = get_todos_length();
-    printf("length: %d \n", length);
-    Todo **todos = malloc(length * sizeof(Todo));
-    int result = get_todos(todos, length) != 0;
-    if (result != 0) {
-      printf("error \n");
-      printf("error: %d \n", result);
+    int length;
+    Todo **todos = get_todos(&length);
+    if (todos == NULL) {
+      printf("error: \n");
       return 1;
     }
     for (int pos = 0; pos < length; pos++) {

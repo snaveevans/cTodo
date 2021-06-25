@@ -8,8 +8,7 @@ typedef struct {
 } Todo;
 
 Todo *create_todo(char *name);
-int get_todos_length();
-int get_todos(Todo **todos, int length);
+Todo** get_todos(int *length);
 int append_todo(Todo *todo);
 void free_todo(Todo *todo);
 void free_todos(Todo **todos, int length);

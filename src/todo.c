@@ -113,27 +113,10 @@ end:
   return result;
 }
 
-int get_todos_length() {
+Todo **get_todos(int *length) {
   int result = 0;
-  cJSON *todoCjson = NULL;
-  cJSON *storageJson = NULL;
-  cJSON *todosJsonArray = NULL;
-
-  if (get_storage(&storageJson, &todosJsonArray) != 0) {
-    result = 1;
-    goto end;
-  }
-
-  int length = 0;
-  cJSON_ArrayForEach(todoCjson, todosJsonArray) { length = length + 1; }
-
-end:
-  cJSON_Delete(storageJson);
-  return length;
-}
-
-int get_todos(Todo **todos, int length) {
-  int result = 0;
+  int position = 0;
+  Todo **todos = NULL;
   cJSON *idJson = NULL;
   cJSON *nameJson = NULL;
   cJSON *todoJson = NULL;
@@ -145,24 +128,24 @@ int get_todos(Todo **todos, int length) {
     goto end;
   }
 
-  int pos = 0;
   cJSON_ArrayForEach(todoJson, todosJsonArray) {
     idJson = cJSON_GetObjectItemCaseSensitive(todoJson, "id");
     nameJson = cJSON_GetObjectItemCaseSensitive(todoJson, "name");
 
     Todo *todo = _recreate_todo(nameJson->valuestring, idJson->valuestring);
-    todos[pos] = todo;
-    pos++;
-    if (pos == length) {
-      goto end;
-    }
+    int size = (position + 1) * sizeof(Todo);
+    todos = realloc(todos, size);
+    todos[position] = todo;
+    position = position + 1;
   }
 
 end:
-  if (result == 0) {
-    cJSON_Delete(storageJson);
+  if (result != 0) {
+    return NULL;
   }
-  return result;
+  cJSON_Delete(storageJson);
+  *length = position;
+  return todos;
 }
 
 int add_to_json_array(Todo *todoObj, cJSON *todosJsonArray) {
