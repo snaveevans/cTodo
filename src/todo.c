@@ -93,29 +93,65 @@ int get_todos_length() {
   return length;
 }
 
-int get_todos(Todo **todos, int length) {
+int get_storage(cJSON **storage, cJSON **todosJsonArray) {
   int result = 0;
-  cJSON *id = NULL;
-  cJSON *name = NULL;
-  cJSON *todoCjson = NULL;
-  cJSON *todosCjson = NULL;
-  cJSON *todoStorage = _get_todo_storage();
-  if (todoStorage == NULL) {
-    return 1;
+  *storage = _get_todo_storage();
+
+  if (storage == NULL) {
+    // no file create storage and todosArray
+    goto create;
   }
 
-  todosCjson = cJSON_GetObjectItemCaseSensitive(todoStorage, "todos");
-  if (todosCjson == NULL) {
+  *todosJsonArray = cJSON_GetObjectItemCaseSensitive(*storage, "todos");
+  if (todosJsonArray == NULL) {
+    // file exists but no todos, create storage and todosArray
+    goto create;
+  }
+  goto end;
+
+create:
+  *storage = cJSON_CreateObject();
+  if (storage == NULL) {
+    // unexpected error
+    result = 1;
+    goto end;
+  }
+
+  *todosJsonArray = cJSON_CreateArray();
+  if (todosJsonArray == NULL) {
+    // unexpected error
+    result = 2;
+    goto end;
+  }
+  cJSON_AddItemToObject(*storage, "todos", *todosJsonArray);
+
+end:
+  if (result >= 2) {
+    cJSON_Delete(*storage);
+    storage = NULL;
+  }
+  return result;
+}
+
+int get_todos(Todo **todos, int length) {
+  int result = 0;
+  cJSON *idJson = NULL;
+  cJSON *nameJson = NULL;
+  cJSON *todoJson = NULL;
+  cJSON *storage = NULL;
+  cJSON *todosJsonArray = NULL;
+
+  if (get_storage(&storage, &todosJsonArray) != 0) {
     result = 1;
     goto end;
   }
 
   int pos = 0;
-  cJSON_ArrayForEach(todoCjson, todosCjson) {
-    id = cJSON_GetObjectItemCaseSensitive(todoCjson, "id");
-    name = cJSON_GetObjectItemCaseSensitive(todoCjson, "name");
+  cJSON_ArrayForEach(todoJson, todosJsonArray) {
+    idJson = cJSON_GetObjectItemCaseSensitive(todoJson, "id");
+    nameJson = cJSON_GetObjectItemCaseSensitive(todoJson, "name");
 
-    Todo *todo = _recreate_todo(name->valuestring, id->valuestring);
+    Todo *todo = _recreate_todo(nameJson->valuestring, idJson->valuestring);
     todos[pos] = todo;
     pos++;
     if (pos == length) {
@@ -124,7 +160,9 @@ int get_todos(Todo **todos, int length) {
   }
 
 end:
-  cJSON_Delete(todoStorage);
+  if (result == 0) {
+    cJSON_Delete(storage);
+  }
   return result;
 }
 
@@ -169,52 +207,12 @@ end:
   return result;
 }
 
-int get_storage(cJSON** storage, cJSON** todosJsonArray) {
-  int result = 0;
-  *storage = _get_todo_storage();
-
-  if (storage == NULL) {
-    // no file create storage and todosArray
-    goto create;
-  }
-
-  *todosJsonArray = cJSON_GetObjectItemCaseSensitive(*storage, "todos");
-  if (todosJsonArray == NULL) {
-    // file exists but no todos, create storage and todosArray
-    goto create;
-  }
-  goto end;
-
-create:
-  *storage = cJSON_CreateObject();
-  if (storage == NULL) {
-    // unexpected error
-    result = 1;
-    goto end;
-  }
-
-  *todosJsonArray = cJSON_CreateArray();
-  if (todosJsonArray == NULL) {
-    // unexpected error
-    result = 2;
-    goto end;
-  }
-  cJSON_AddItemToObject(*storage, "todos", *todosJsonArray);
-
-end:
-  if (result >= 2) {
-    cJSON_Delete(*storage);
-    storage = NULL;
-  }
-  return result;
-}
-
 int append_todo(Todo *todo) {
   int result = 0;
   char *string = NULL;
   FILE *file = NULL;
-  cJSON* storage = NULL;
-  cJSON* todosJsonArray = NULL;
+  cJSON *storage = NULL;
+  cJSON *todosJsonArray = NULL;
 
   if (get_storage(&storage, &todosJsonArray) != 0) {
     result = 1;
