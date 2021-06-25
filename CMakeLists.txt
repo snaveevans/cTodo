@@ -8,5 +8,3 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "bin")
 file(GLOB_RECURSE SOURCES "src/*.c")
 
 add_executable(ctodo ${SOURCES})
-
-target_link_libraries(ctodo cjson)
