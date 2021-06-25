@@ -45,10 +45,10 @@ Todo *_recreate_todo(char *name, char *id) {
   return todo;
 }
 
-cJSON *_get_todo_storage() {
+cJSON *_get_todo_storageJson() {
   int length = 0;
   char *buffer = NULL;
-  cJSON *todoStorage = NULL;
+  cJSON *todostorageJson = NULL;
   FILE *file = get_todo_file("r");
   if (file == NULL) {
     return NULL;
@@ -66,52 +66,32 @@ cJSON *_get_todo_storage() {
   }
 
   if (buffer) {
-    todoStorage = cJSON_Parse(buffer);
+    todostorageJson = cJSON_Parse(buffer);
     free(buffer);
   }
 
-  return todoStorage;
+  return todostorageJson;
 }
 
-int get_todos_length() {
-  cJSON *todoCjson = NULL;
-  cJSON *todosCjson = NULL;
-  cJSON *todoStorage = _get_todo_storage();
-  if (todoStorage == NULL) {
-    return -1;
-  }
-
-  todosCjson = cJSON_GetObjectItemCaseSensitive(todoStorage, "todos");
-  if (todosCjson == NULL) {
-    return -1;
-  }
-
-  int length = 0;
-  cJSON_ArrayForEach(todoCjson, todosCjson) { length = length + 1; }
-
-  cJSON_Delete(todoStorage);
-  return length;
-}
-
-int get_storage(cJSON **storage, cJSON **todosJsonArray) {
+int get_storage(cJSON **storageJson, cJSON **todosJsonArray) {
   int result = 0;
-  *storage = _get_todo_storage();
+  *storageJson = _get_todo_storageJson();
 
-  if (storage == NULL) {
-    // no file create storage and todosArray
+  if (storageJson == NULL) {
+    // no file create storageJson and todosArray
     goto create;
   }
 
-  *todosJsonArray = cJSON_GetObjectItemCaseSensitive(*storage, "todos");
+  *todosJsonArray = cJSON_GetObjectItemCaseSensitive(*storageJson, "todos");
   if (todosJsonArray == NULL) {
-    // file exists but no todos, create storage and todosArray
+    // file exists but no todos, create storageJson and todosArray
     goto create;
   }
   goto end;
 
 create:
-  *storage = cJSON_CreateObject();
-  if (storage == NULL) {
+  *storageJson = cJSON_CreateObject();
+  if (storageJson == NULL) {
     // unexpected error
     result = 1;
     goto end;
@@ -123,14 +103,33 @@ create:
     result = 2;
     goto end;
   }
-  cJSON_AddItemToObject(*storage, "todos", *todosJsonArray);
+  cJSON_AddItemToObject(*storageJson, "todos", *todosJsonArray);
 
 end:
   if (result >= 2) {
-    cJSON_Delete(*storage);
-    storage = NULL;
+    cJSON_Delete(*storageJson);
+    storageJson = NULL;
   }
   return result;
+}
+
+int get_todos_length() {
+  int result = 0;
+  cJSON *todoCjson = NULL;
+  cJSON *storageJson = NULL;
+  cJSON *todosJsonArray = NULL;
+
+  if (get_storage(&storageJson, &todosJsonArray) != 0) {
+    result = 1;
+    goto end;
+  }
+
+  int length = 0;
+  cJSON_ArrayForEach(todoCjson, todosJsonArray) { length = length + 1; }
+
+end:
+  cJSON_Delete(storageJson);
+  return length;
 }
 
 int get_todos(Todo **todos, int length) {
@@ -138,10 +137,10 @@ int get_todos(Todo **todos, int length) {
   cJSON *idJson = NULL;
   cJSON *nameJson = NULL;
   cJSON *todoJson = NULL;
-  cJSON *storage = NULL;
+  cJSON *storageJson = NULL;
   cJSON *todosJsonArray = NULL;
 
-  if (get_storage(&storage, &todosJsonArray) != 0) {
+  if (get_storage(&storageJson, &todosJsonArray) != 0) {
     result = 1;
     goto end;
   }
@@ -161,7 +160,7 @@ int get_todos(Todo **todos, int length) {
 
 end:
   if (result == 0) {
-    cJSON_Delete(storage);
+    cJSON_Delete(storageJson);
   }
   return result;
 }
@@ -211,10 +210,10 @@ int append_todo(Todo *todo) {
   int result = 0;
   char *string = NULL;
   FILE *file = NULL;
-  cJSON *storage = NULL;
+  cJSON *storageJson = NULL;
   cJSON *todosJsonArray = NULL;
 
-  if (get_storage(&storage, &todosJsonArray) != 0) {
+  if (get_storage(&storageJson, &todosJsonArray) != 0) {
     result = 1;
     goto end;
   }
@@ -224,7 +223,7 @@ int append_todo(Todo *todo) {
     goto end;
   }
 
-  string = cJSON_PrintUnformatted(storage);
+  string = cJSON_PrintUnformatted(storageJson);
   if (string == NULL) {
     result = 3;
     goto end;
@@ -234,8 +233,8 @@ int append_todo(Todo *todo) {
 end:
   // cleanup
   if (result >= 2 || result == 0) {
-    cJSON_Delete(storage);
-    storage = NULL;
+    cJSON_Delete(storageJson);
+    storageJson = NULL;
     todosJsonArray = NULL;
   }
   if (result == 0) {
