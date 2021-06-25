@@ -94,18 +94,20 @@ int get_todos_length() {
 }
 
 int get_todos(Todo **todos, int length) {
+  int result = 0;
   cJSON *id = NULL;
   cJSON *name = NULL;
   cJSON *todoCjson = NULL;
   cJSON *todosCjson = NULL;
   cJSON *todoStorage = _get_todo_storage();
   if (todoStorage == NULL) {
-    return -1;
+    return 1;
   }
 
   todosCjson = cJSON_GetObjectItemCaseSensitive(todoStorage, "todos");
   if (todosCjson == NULL) {
-    return -1;
+    result = 1;
+    goto end;
   }
 
   int pos = 0;
@@ -123,52 +125,128 @@ int get_todos(Todo **todos, int length) {
 
 end:
   cJSON_Delete(todoStorage);
-  return 0;
+  return result;
 }
 
-int write_todo(Todo *todo) {
-  char *string = NULL;
-  cJSON *todos = NULL;
-  cJSON *todoCjson = NULL;
-  cJSON *name = NULL;
-  cJSON *id = NULL;
+int add_to_json_array(Todo *todoObj, cJSON *todosJsonArray) {
+  int result = 0;
+  cJSON *todoJson = NULL;
+  cJSON *nameJson = NULL;
+  cJSON *idJson = NULL;
+  todoJson = cJSON_CreateObject();
 
-  cJSON *todoStorage = cJSON_CreateObject();
-  if (todoStorage == NULL) {
+  if (todoJson == NULL) {
+    result = 1;
     goto end;
   }
+  cJSON_AddItemToArray(todosJsonArray, todoJson);
 
-  todos = cJSON_CreateArray();
-  if (todos == NULL) {
+  nameJson = cJSON_CreateString(todoObj->name);
+  if (nameJson == NULL) {
+    result = 2;
     goto end;
   }
-  cJSON_AddItemToObject(todoStorage, "todos", todos);
+  cJSON_AddItemToObject(todoJson, "name", nameJson);
 
-  todoCjson = cJSON_CreateObject();
-  if (todoCjson == NULL) {
+  idJson = cJSON_CreateString(todoObj->id->value);
+  if (idJson == NULL) {
+    result = 3;
     goto end;
   }
-  cJSON_AddItemToArray(todos, todoCjson);
+  cJSON_AddItemToObject(todoJson, "id", idJson);
 
-  name = cJSON_CreateString(todo->name);
-  if (name == NULL) {
-    goto end;
-  }
-  cJSON_AddItemToObject(todoCjson, "name", name);
-
-  id = cJSON_CreateString(todo->id->value);
-  if (id == NULL) {
-    goto end;
-  }
-  cJSON_AddItemToObject(todoCjson, "id", id);
-
-  string = cJSON_PrintUnformatted(todoStorage);
-  if (string != NULL) {
-    FILE *file = get_todo_file("w");
-    fprintf(file, "%s\n", string);
-  }
 end:
-  return 0;
+  // TODO should we clear on 0
+  // if so add cJSON_Delete for idJson
+  if (result >= 2) {
+    cJSON_Delete(todoJson);
+    todoJson = NULL;
+  }
+  if (result >= 3) {
+    cJSON_Delete(nameJson);
+    nameJson = NULL;
+  }
+  return result;
+}
+
+int get_storage(cJSON** storage, cJSON** todosJsonArray) {
+  int result = 0;
+  *storage = _get_todo_storage();
+
+  if (storage == NULL) {
+    // no file create storage and todosArray
+    goto create;
+  }
+
+  *todosJsonArray = cJSON_GetObjectItemCaseSensitive(*storage, "todos");
+  if (todosJsonArray == NULL) {
+    // file exists but no todos, create storage and todosArray
+    goto create;
+  }
+  goto end;
+
+create:
+  *storage = cJSON_CreateObject();
+  if (storage == NULL) {
+    // unexpected error
+    result = 1;
+    goto end;
+  }
+
+  *todosJsonArray = cJSON_CreateArray();
+  if (todosJsonArray == NULL) {
+    // unexpected error
+    result = 2;
+    goto end;
+  }
+  cJSON_AddItemToObject(*storage, "todos", *todosJsonArray);
+
+end:
+  if (result >= 2) {
+    cJSON_Delete(*storage);
+    storage = NULL;
+  }
+  return result;
+}
+
+int append_todo(Todo *todo) {
+  int result = 0;
+  char *string = NULL;
+  FILE *file = NULL;
+  cJSON* storage = NULL;
+  cJSON* todosJsonArray = NULL;
+
+  if (get_storage(&storage, &todosJsonArray) != 0) {
+    result = 1;
+    goto end;
+  }
+
+  if (add_to_json_array(todo, todosJsonArray) != 0) {
+    result = 2;
+    goto end;
+  }
+
+  string = cJSON_PrintUnformatted(storage);
+  if (string == NULL) {
+    result = 3;
+    goto end;
+  }
+  file = get_todo_file("w");
+  fprintf(file, "%s\n", string);
+end:
+  // cleanup
+  if (result >= 2 || result == 0) {
+    cJSON_Delete(storage);
+    storage = NULL;
+    todosJsonArray = NULL;
+  }
+  if (result == 0) {
+    free(string);
+    fclose(file);
+    string = NULL;
+    file = NULL;
+  }
+  return result;
 }
 
 void free_todo(Todo *todo) {

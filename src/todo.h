@@ -10,7 +10,7 @@ typedef struct {
 Todo *create_todo(char *name);
 int get_todos_length();
 int get_todos(Todo **todos, int length);
-int write_todo(Todo *todo);
+int append_todo(Todo *todo);
 void free_todo(Todo *todo);
 void free_todos(Todo **todos, int length);
 

@@ -54,32 +54,40 @@ int main(int argc, char **argv) {
       return 1;
     }
     printf("Todo created id: %s name: %s \n", todo->id->value, todo->name);
-    write_todo(todo);
+    int result = append_todo(todo);
+    if (result != 0) {
+      printf("error: %d \n", result);
+      return result;
+    }
     free_todo(todo);
     break;
   }
-  case 'h':
+  case 'h': {
     printf("help text \n");
     break;
+  }
   case 'l': {
     int length = get_todos_length();
     printf("length: %d \n", length);
     Todo **todos = malloc(length * sizeof(Todo));
-    ;
-    if (get_todos(todos, length) == 0) {
-      for (int pos = 0; pos < length; pos++) {
-        printf("[%d] Id: %s -- Name: %s \n", pos, todos[pos]->id->value,
-               todos[pos]->name);
-      }
+    int result = get_todos(todos, length) != 0;
+    if (result != 0) {
+      printf("error \n");
+      printf("error: %d \n", result);
+      return 1;
+    }
+    for (int pos = 0; pos < length; pos++) {
+      printf("[%d] Id: %s -- Name: %s \n", pos, todos[pos]->id->value,
+             todos[pos]->name);
     }
     free_todos(todos, length);
-    ;
 
     break;
   }
-  case 'v':
+  case 'v': {
     printf("version text \n");
     break;
+  }
   }
 
   return 0;
