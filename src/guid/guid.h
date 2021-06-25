@@ -1,9 +1,8 @@
-#ifndef GUID_H_ 
-#define GUID_H_ 
+#ifndef GUID_H_
+#define GUID_H_
 
-typedef struct
-{
-	char *value;
+typedef struct {
+  char *value;
 } Guid;
 
 Guid *new_guid();

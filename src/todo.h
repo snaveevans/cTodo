@@ -1,11 +1,10 @@
-#ifndef TODO_H_ 
-#define TODO_H_ 
+#ifndef TODO_H_
+#define TODO_H_
 #include "guid/guid.h"
 
-typedef struct
-{
-	Guid *id;
-	char *name;
+typedef struct {
+  Guid *id;
+  char *name;
 } Todo;
 
 Todo *create_todo(char *name);

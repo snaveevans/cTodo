@@ -1,5 +1,5 @@
-#ifndef FILE_H_ 
-#define FILE_H_ 
+#ifndef FILE_H_
+#define FILE_H_
 #include <stdio.h>
 
 static const char *TODO_FILE_NAME = ".todo";
