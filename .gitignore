@@ -1,3 +1,4 @@
+.cache/
 .ccls-cache
 compile_commands.json
 # Created by https://www.gitignore.io/api/c,vim,clion,cmake,visualstudio,visualstudiocode
